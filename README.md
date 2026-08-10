@@ -1,6 +1,6 @@
 # F1 Telemetry Analytics
 
-A data engineering project focused on analyzing Formula 1 car telemetry data using Python, Apache Spark, Docker, and OpenF1.
+A data engineering project focused on analyzing Formula 1 car telemetry data using Python, Apache Spark, Docker, and OpenF1 API.
 
 The project is designed to strengthen distributed data processing skills and explore an IoT Data Engineering use case based on high-frequency sensor data.
 
