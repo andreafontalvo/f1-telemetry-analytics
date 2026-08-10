@@ -1,0 +1,7 @@
+services:
+  f1-telemetry:
+    build: .
+    container_name: f1-telemetry
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
