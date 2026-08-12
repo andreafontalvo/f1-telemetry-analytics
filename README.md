@@ -29,22 +29,31 @@ The project currently focuses on **Race** sessions and uses the `car_data` endpo
 
 ## Architecture
 
-```text
-OpenF1 API
-     │
-     ▼
-Python ingestion
-     │
-     ▼
-Local JSON cache
-     │
-     ▼
-Apache Spark
-     │
-     ▼
-Telemetry analysis
-```
+Downloaded telemetry is stored locally and reused on subsequent executions. Before requesting a chunk from the API, the ingestion pipeline checks whether the corresponding JSON file already exists. This makes the ingestion process restartable. If a run is interrupted, the pipeline does not need to download already completed chunks again.
 
+```text
+                         OpenF1 API
+                              │
+                              ▼
+                    Python Ingestion Layer
+                              │
+                    ┌─────────┴─────────┐
+                    │                   │
+              Race metadata       Driver telemetry
+                    │                   │
+                    │          Time-based chunks
+                    │             (10 min)
+                    │                   │
+                    └─────────┬─────────┘
+                              ▼
+                       Local JSON Cache
+                              │
+                              ▼
+                       Apache Spark
+                              │
+                              ▼
+                    Telemetry Analytics
+```
 
 ## Project Structure
 
@@ -52,7 +61,27 @@ Telemetry analysis
 f1-telemetry-analytics/
 │
 ├── data/
-│   └── raw/                 # Downloaded telemetry data (ignored by Git)
+│   └── raw/
+│       └── <year>/
+│           └── <grand_prix>/
+│               └── race/
+│                   ├── meeting.json
+│                   ├── session.json
+│                   ├── drivers.json
+│                   │
+│                   └── telemetry/
+│                       ├── VER/
+│                       │   ├── chunk_000.json
+│                       │   ├── chunk_001.json
+│                       │   ├── chunk_002.json
+│                       │   └── ...
+│                       │
+│                       ├── NOR/
+│                       │   ├── chunk_000.json
+│                       │   ├── chunk_001.json
+│                       │   └── ...
+│                       │
+│                       └── ...
 │
 ├── src/
 │   ├── ingestion/
@@ -70,6 +99,7 @@ f1-telemetry-analytics/
 └── README.md
 ```
 
+
 ## Running the Project
 
 Build the Docker image:
@@ -85,6 +115,19 @@ docker compose run --rm f1-telemetry
 ```
 
 Downloaded telemetry is stored locally and reused on executions through the cache.
+
+## Updates
+### August 2026
+* Added OpenF1 API client.
+* Added automatic selection of meetings by year + country.
+* Added automatic selection of the Race session.
+* Added automatic discovery of all drivers participating in the race.
+* Added car_data telemetry ingestion.
+* Changed telemetry ingestion from full-session requests to 10-minute time-based chunks.
+* Added per-driver telemetry storage.
+* Added per-chunk local caching.
+* Added retry logic with exponential backoff for OpenF1 API rate limits.
+* Added Docker-based development environment.
 
 ## Current Status
 
