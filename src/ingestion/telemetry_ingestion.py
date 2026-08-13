@@ -64,6 +64,10 @@ class TelemetryIngestion:
         with open(path, "w", encoding="utf-8") as file:
             json.dump(data,file,indent=2,ensure_ascii=False)
 
+    def _save_json_lines(self, data, path):
+        with open(path, "w", encoding="utf-8") as file:
+            for record in data:
+                file.write(json.dumps(record, ensure_ascii=False) + "\n")
 
     def download_driver_telemetry(self, session, driver, driver_dir):
         session_key = session["session_key"]
@@ -108,7 +112,8 @@ class TelemetryIngestion:
             print(f"    {len(chunk)} records")
 
             # save CHUNK
-            self._save_json(chunk,output_file)
+            # self._save_json(chunk,output_file)
+            self._save_json_lines(chunk,output_file)
 
             current = chunk_end
             chunk_number += 1
