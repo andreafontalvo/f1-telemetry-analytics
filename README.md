@@ -143,8 +143,8 @@ Downloaded telemetry is stored locally and reused on executions through the cach
 
 ### Phase 2 — Spark Analytics
 
-* [ ] Read telemetry with Spark
-* [ ] Explore Spark DataFrames
+* [x] Read telemetry with Spark
+* [x] Explore Spark DataFrames
 * [ ] Clean and transform telemetry
 * [ ] Driver-level aggregations
 * [ ] Telemetry analytics
