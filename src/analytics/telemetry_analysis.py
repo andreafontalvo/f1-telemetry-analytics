@@ -1,11 +1,14 @@
 from pathlib import Path
 
 from pyspark.sql import SparkSession
+
 from pyspark.sql.functions import (
     col,
     count,
     when,
-    to_timestamp
+    to_timestamp,
+    avg,
+    max
 )
 
 class TelemetryAnalysis:
@@ -29,8 +32,24 @@ class TelemetryAnalysis:
         df = self.spark.read.json(files)
         return df
 
+    # def clean_telemetry(self, df):
+    #     clean_df = (df.withColumn("date", to_timestamp("date")))
+    #     return clean_df
+
     def clean_telemetry(self, df):
-        clean_df = (df.withColumn("date", to_timestamp("date")))
+        clean_df = (
+            df
+            .withColumn("date", to_timestamp("date"))
+            .withColumn(
+                "throttle",
+                when(col("throttle") <= 100, col("throttle"))
+            )
+            .withColumn(
+                "brake",
+                when(col("brake") <= 100, col("brake"))
+            )
+        )
+
         return clean_df
 
 
@@ -68,7 +87,28 @@ class TelemetryAnalysis:
             count(when(col("brake") > 100, True)).alias("brake_over_100"),
             count(when(col("n_gear") > 8, True)).alias("gear_over_8")
         ).show()
-    
+
+        print("\n=== Throttle values above 100 ===")
+
+        df.filter(col("throttle") > 100).select(
+            "date",
+            "throttle",
+            "speed",
+            "rpm",
+            "brake"
+        ).show(20, truncate=False)
+
+
+        print("\n=== Brake values above 100 ===")
+
+        df.filter(col("brake") > 100).select(
+            "date",
+            "brake",
+            "speed",
+            "rpm",
+            "throttle"
+        ).show(20, truncate=False)
+
 
     def inspect(self, df):  
 
@@ -86,3 +126,18 @@ class TelemetryAnalysis:
 
     def stop(self):
         self.spark.stop()
+
+
+    def basic_metrics(self, df):
+        print("\n=== Basic Metrics ===")
+
+        metrics = df.agg(
+            max("speed").alias("max_speed"),
+            avg("speed").alias("avg_speed"),
+            max("rpm").alias("max_rpm"),
+            avg("rpm").alias("avg_rpm"),
+            avg("throttle").alias("avg_throttle"),
+            avg("brake").alias("avg_brake")
+        )
+
+        metrics.show()

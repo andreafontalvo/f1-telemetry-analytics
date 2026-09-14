@@ -30,12 +30,11 @@ def main():
     )
 
     df = analysis.load_driver_telemetry(telemetry_path) 
-
     clean_df = analysis.clean_telemetry(df)
-
+    
     analysis.inspect(clean_df)
-
     analysis.quality_check(clean_df)
+    analysis.basic_metrics(clean_df)
 
     analysis.stop()
 
