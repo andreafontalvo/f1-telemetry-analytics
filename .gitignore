@@ -9,6 +9,7 @@ venv/
 
 # Data
 data/raw/
+data/processed/*.png
 
 # macOS
 .DS_Store
