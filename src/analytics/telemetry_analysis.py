@@ -14,7 +14,6 @@ from pyspark.sql.functions import (
 class TelemetryAnalysis:
 
     def __init__(self):
-
         self.spark = (SparkSession.builder.appName("F1 Telemetry Analytics").getOrCreate())
 
 
@@ -111,26 +110,18 @@ class TelemetryAnalysis:
 
 
     def inspect(self, df):  
-
         print("\n=== Schema ===")
         df.printSchema()
-
         print("\n=== Record count ===")
         print(df.count())
-
         print("\n=== Sample ===")
         df.show(10, truncate=False)
-
         print("\n=== Statistics ===")
         df.describe().show()
-
-    def stop(self):
-        self.spark.stop()
 
 
     def basic_metrics(self, df):
         print("\n=== Basic Metrics ===")
-
         metrics = df.agg(
             max("speed").alias("max_speed"),
             avg("speed").alias("avg_speed"),
@@ -139,5 +130,19 @@ class TelemetryAnalysis:
             avg("throttle").alias("avg_throttle"),
             avg("brake").alias("avg_brake")
         )
-
         metrics.show()
+
+
+    def metrics_by_gear(self, df):
+        print("\n=== Metrics by Gear ===")
+
+        metrics = (
+            df.groupBy("n_gear").agg(
+                avg("speed").alias("avg_speed"),
+                max("speed").alias("max_speed")
+            ) .orderBy("n_gear"))
+        metrics.show()
+
+    
+    def stop(self):
+        self.spark.stop()
