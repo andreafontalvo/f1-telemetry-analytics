@@ -1,7 +1,6 @@
 from pathlib import Path
-
+import matplotlib.pyplot as plt
 from pyspark.sql import SparkSession
-
 from pyspark.sql.functions import (
     col,
     count,
@@ -10,6 +9,7 @@ from pyspark.sql.functions import (
     avg,
     max
 )
+
 
 class TelemetryAnalysis:
 
@@ -141,8 +141,38 @@ class TelemetryAnalysis:
                 avg("speed").alias("avg_speed"),
                 max("speed").alias("max_speed")
             ) .orderBy("n_gear"))
-        metrics.show()
 
+        metrics.show()
+        return metrics
+
+
+    def plot_speed_by_gear(self, metrics, year, race, driver):
+        rows = metrics.collect()
+
+        gears = [row["n_gear"] for row in rows]
+        avg_speed = [row["avg_speed"] for row in rows]
+        max_speed = [row["max_speed"] for row in rows]
+
+        plt.figure(figsize=(10, 6))
+
+        plt.plot(gears,avg_speed,marker="o",label="Average speed")
+        plt.plot(gears,max_speed,marker="o",label="Maximum speed")
+
+        plt.xlabel("Gear")
+        plt.ylabel("Speed (km/h)")
+        plt.title(f"{driver}: speed by gear ({year} {race})")
+
+        plt.xticks(gears)
+        plt.legend()
+        plt.grid(True)
+
+        plt.tight_layout()
+
+        plt.savefig(f"/app/data/processed/speed_by_gear_{year}_{race}_{driver}.png")
+        print(f"\n=== Speed by Gear plot saved at /app/data/processed/speed_by_gear_{year}_{race}_{driver}.png ===")
+
+        plt.close()
+    
     
     def stop(self):
         self.spark.stop()

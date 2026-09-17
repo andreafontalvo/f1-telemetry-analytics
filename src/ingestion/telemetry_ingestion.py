@@ -58,7 +58,7 @@ class TelemetryIngestion:
             )
 
             self.download_driver_telemetry(session=session,driver=driver,driver_dir=driver_dir)
-
+        return race_dir
 
     def _save_json(self, data, path):
         with open(path, "w", encoding="utf-8") as file:
@@ -68,6 +68,7 @@ class TelemetryIngestion:
         with open(path, "w", encoding="utf-8") as file:
             for record in data:
                 file.write(json.dumps(record, ensure_ascii=False) + "\n")
+
 
     def download_driver_telemetry(self, session, driver, driver_dir):
         session_key = session["session_key"]
